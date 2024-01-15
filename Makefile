@@ -4,7 +4,7 @@ run:
 migrations:
 	python manage.py makemigrations && python manage.py migrate
 
-super:
+superuser:
 	python manage.py createsuperuser
 
 checklist:
