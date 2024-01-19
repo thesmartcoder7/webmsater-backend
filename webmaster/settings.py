@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'dns_manager.apps.DnsManagerConfig',
     'seo_manager.apps.SeoManagerConfig',
-    'ssl_manager.apps.SslManagerConfig'
+    'ssl_manager.apps.SslManagerConfig',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
