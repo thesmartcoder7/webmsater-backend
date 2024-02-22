@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'dns_manager.apps.DnsManagerConfig',
     'seo_manager.apps.SeoManagerConfig',
     'ssl_manager.apps.SslManagerConfig',
