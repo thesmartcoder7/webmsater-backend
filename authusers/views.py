@@ -15,24 +15,6 @@ def all_users(request):
     return Response(serialized.data)
 
 
-@api_view(['GET'])
-def retrieve_user(request):
-    token = request.COOKIES.get('jwt')
-
-    if not token:
-        raise AuthenticationFailed('Unauthenticated')
-    
-    try:
-        payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-    except:
-        raise AuthenticationFailed('Unauthenticated')
-    
-    user = User.objects.get(id=payload['id'])
-    serialized_user = UserSerializer(user)
-
-    return Response(serialized_user.data)
-
-
 @api_view(['POST'])
 def register(request):
     inbound_user = UserSerializer(data=request.data)
@@ -48,30 +30,47 @@ def login(request):
     user = User.objects.get(email=email)
 
     if not user:
-        raise AuthenticationFailed
-    else:
-        if not user.check_password(password):
-            raise AuthenticationFailed("Incorrect Password")
-        else:
+        raise AuthenticationFailed('User not found!')
+    
+    if not user.check_password(password):
+        raise AuthenticationFailed("Incorrect Password")
+    
+    payload = {
+        'id': user.id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+        'iat': datetime.datetime.utcnow()
+    }
 
-            payload = {
-                'id': user.id,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-                'iat': datetime.datetime.utcnow()
-            }
+    token = jwt.encode(payload, 'secret', algorithm='HS256')
+    # token = jwt.encode(payload, 'secret', algorithm='HS256')
 
-            token = jwt.encode(payload, 'secret', algorithm='HS256')
-            # depricated:
-            # token = jwt.encode(payload, 'secret', algorithm='HS256')
+    response = Response()
+    response.set_cookie(key='jwt', value=token, httponly=True)
 
-            response = Response()
-            response.set_cookie(key='jwt', value=token, httponly=True)
+    response.data = {
+        'jwt': token
+    }
 
-            response.data = {
-                'jwt': token
-            }
+    return response
+        
 
-            return response
+@api_view(['GET'])
+def check_user(request):
+    token = request.COOKIES.get('jwt')
+    print(request.COOKIES.get('jwt'))
+    if not token:
+        raise AuthenticationFailed('Unauthenticated')
+    
+    try:
+        payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailed('Unauthenticated')
+    
+    user = User.objects.get(id=payload['id'])
+    serialized_user = UserSerializer(user)
+
+    return Response(serialized_user.data)
+
         
 
 @api_view(['POST'])
