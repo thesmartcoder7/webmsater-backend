@@ -43,11 +43,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+
     def get_full_name(self):
-            return self.full_name
+        return self.full_name
         
     def get_short_name(self):
-        return self.full_name.split(' ')[0] or self.email.split('@')[0]
+        return self.full_name.split(' ')[0]
 
     class Meta:
         verbose_name = 'User'
