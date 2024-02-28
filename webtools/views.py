@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from webtools.sitemap import SitemapGenerator
@@ -21,24 +20,25 @@ def generate_sitemap(request):
 
 @api_view(['POST'])
 def domain_check(request):
-    print(f'Performing Domain Check on {domain}')
     domain =  request.data['domain']
     response = {}
+
+    print(f'Performing Domain Check on {domain}')
 
     ssl_cetificate = get_ssl_certificate(domain=domain)
     cipher_suites = check_cipher_suites(ssl_cetificate)
     security_headers = check_security_headers(domain=domain)
     dns_info = get_dns_configuration(domain)
-    domain_health_check = domain_check(domain)
-    domain_whois = domain_whois(domain)
+    domain_check = domain_health_check(domain)
+    whois_check = doman_whois(domain)
 
     response = {
         'ssl_cetificate': ssl_cetificate,
         'cipher_suites' : cipher_suites,
         'security_headers' : security_headers,
         'dns_info': dns_info,
-        'domain_health_check': domain_health_check,
-        'domain_whois': domain_whois,
+        'domain_check': domain_check,
+        'whois_check': whois_check
     }
 
     print(f'Domain Check on {domain} has been successfully completed')
