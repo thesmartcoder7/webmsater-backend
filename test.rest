@@ -1,0 +1,28 @@
+GET http://127.0.0.1:8000/users/
+Content-Type: application/json
+
+###
+
+GET http://127.0.0.1:8000/users/user/
+Content-Type: application/json
+
+###
+
+POST http://127.0.0.1:8000/users/register/
+Content-Type: application/json
+
+{"full_name": "carol mwende", "email":"carol@mwende.com", "password": "testuser123"}
+
+###
+
+POST http://127.0.0.1:8000/users/login/
+Content-Type: application/json
+
+{"email": "carol@mwende.com", "password": "testuser123"}
+
+###
+
+POST http://127.0.0.1:8000/users/logout/
+Content-Type: application/json
+
+{}

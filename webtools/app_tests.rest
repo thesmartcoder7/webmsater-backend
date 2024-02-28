@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8000/webtools/get_sitemap/
+Content-Type: application/json
+
+{
+    "domain": "https://smart-code.dev"
+}

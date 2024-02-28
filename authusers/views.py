@@ -1,8 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 from authusers.models import User
 from authusers.serializers import UserSerializer
+from django.shortcuts import get_object_or_404
 
 import jwt, datetime
 
@@ -18,19 +20,24 @@ def all_users(request):
 @api_view(['POST'])
 def register(request):
     inbound_user = UserSerializer(data=request.data)
-    inbound_user.is_valid(raise_exception=True)
-    inbound_user.save()
-    return Response(inbound_user.data)
+
+    if inbound_user.is_valid():
+        inbound_user.save()
+        return Response({"user": inbound_user.data})
+  
+    return Response(inbound_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def login(request):
     email = request.data['email']
     password = request.data['password']
 
-    user = User.objects.get(email=email)
+    user = get_object_or_404(User, email=email)
 
     if not user:
         raise AuthenticationFailed('User not found!')
+    else:
+        logged_user = UserSerializer(user)
     
     if not user.check_password(password):
         raise AuthenticationFailed("Incorrect Password")
@@ -70,8 +77,7 @@ def check_user(request):
     serialized_user = UserSerializer(user)
 
     return Response(serialized_user.data)
-
-        
+      
 
 @api_view(['POST'])
 def logout(request):

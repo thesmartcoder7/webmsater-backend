@@ -8,6 +8,8 @@ django = "*"
 djangorestframework = "*"
 pyjwt = "*"
 django-cors-headers = "*"
+requests = "*"
+beautifulsoup4 = "*"
 
 [dev-packages]
 
