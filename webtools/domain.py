@@ -106,34 +106,37 @@ def domain_health_check(domain):
             with ssl_context.wrap_socket(sock, server_hostname=domain) as ssock:
                 check = ''
                 if ssock.getpeercert():
-                    check = 'SSL Check: Success!'
+                    check = {'status': 'success', 'message': 'Certificate Available!'}
                 else:
-                    check = 'SSL Check: Unsuccessful!'
+                    check = {'status': 'fail', 'message': 'Certificate NOT Available!'}
         
         result['ssl-check'] = check
 
         # Email deliverability check
         mx_records = dns.resolver.resolve(domain, 'MX')
+        emails_check = []
         for mx in mx_records:
             try:
                 smtp_server = smtplib.SMTP(mx.exchange.to_text(), timeout=10)
                 smtp_server.quit()
-                result[f'Email deliverability to {mx.exchange.to_text()}'] = 'Success'
+                emails_check.append({'mx': f'email deliverability to {mx.exchange.to_text()}', 'status': 'success', 'message': 'Success!'}) 
             except Exception as e:
-                result[f'Email deliverability to {mx.exchange.to_text()}'] = f'Error - {e}'
+                emails_check.append({'mx': f'email deliverability to {mx.exchange.to_text()}', 'status': 'fail', 'message': f'Error - {e}'})
+
+        result['emails_check'] = emails_check
 
         # Website accessibility check
         response = requests.head(f"https://{domain}", timeout=10)
         if response.status_code == 200:
-            result['Website accessibility'] = 'Available'
+            result['website-accessibility'] = {'status': 'success', 'message': 'Available!'}
         else:
-            result["Website accessibility"] = f"Error - HTTP status code {response.status_code}"
+            result["website-accessibility"] = {'status': 'fail', 'message': f'Error - HTTP status code {response.status_code}'}
 
 
         # Additional checks (you can add more as needed)
 
     except:
-        result['Error'] = 'Domain health check failed'
+        result['error'] = 'Domain health check failed'
         ...
 
     return result
