@@ -140,8 +140,13 @@ def domain_health_check(domain):
    
 
 def doman_whois(domain):
-    whois_info = whois.whois(domain)
-    return {"whois-info": whois_info}
+    try:
+        whois_info = whois.whois(domain)
+        return {"whois-info": whois_info}
+    except:
+        return {"whois-info": "no whois info available"}
+
+    
 
 
 
