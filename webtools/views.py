@@ -31,6 +31,7 @@ def domain_check(request):
     dns_info = get_dns_configuration(domain)
     domain_check = domain_health_check(domain)
     whois_check = doman_whois(domain)
+    page_insights = insights(domain)
 
     response = {
         'ssl_cetificate': ssl_cetificate,
@@ -38,7 +39,7 @@ def domain_check(request):
         'security_headers' : security_headers,
         'dns_info': dns_info,
         'domain_check': domain_check,
-        'whois_check': whois_check
+        'whois_check': whois_check,
     }
 
     print(f'Domain Check on {domain} has been successfully completed')

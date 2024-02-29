@@ -12,6 +12,7 @@ requests = "*"
 beautifulsoup4 = "*"
 python-whois = "*"
 dnspython = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

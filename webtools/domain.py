@@ -5,6 +5,11 @@ import dns.resolver
 import smtplib
 from datetime import datetime
 import whois
+import os
+
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 
 def get_ssl_certificate(domain):
@@ -148,6 +153,28 @@ def doman_whois(domain):
         return {"whois-info": whois_info}
     except:
         return {"whois-info": "no whois info available"}
+    
+
+def insights(domain):
+    url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
+    views = ['mobile', 'desktop']
+    results = {}
+
+    try:
+        for view in views:
+            params = {
+                'url': f'https://{domain}',
+                'strategy': view,
+                'key': os.getenv('GOOGLE_DEV_KEY'),
+                'category': ['performance', 'seo', 'accessibility', 'best-practices', 'pwa']
+            }
+
+            res = requests.get(url=url, params=params)
+            results[view] = res.json()['lighthouseResult']['categories']
+
+        return results
+    except:
+        return 'error fetching page insights'
 
     
 
