@@ -31,7 +31,6 @@ def domain_check(request):
     dns_info = get_dns_configuration(domain)
     domain_check = domain_health_check(domain)
     whois_check = doman_whois(domain)
-    page_insights = insights(domain)
 
     response = {
         'ssl_cetificate': ssl_cetificate,
@@ -43,6 +42,22 @@ def domain_check(request):
     }
 
     print(f'Domain Check on {domain} has been successfully completed')
+
+    return Response(response)
+
+
+@api_view(['POST'])
+def page_insights(request):
+    domain =  request.data['domain']
+    response = {}
+
+    print(f'Performing PageSpeed analysis Check on {domain}')
+
+    response = {
+        'page_insights': insights(domain)
+    }
+
+    print(f'PageSpeed analysis on {domain} has been successfully completed')
 
     return Response(response)
 
