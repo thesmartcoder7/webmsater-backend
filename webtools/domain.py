@@ -157,20 +157,23 @@ def doman_whois(domain):
 
 def insights(domain):
     url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
-    views = ['mobile', 'desktop']
     results = {}
 
     try:
-        for view in views:
-            params = {
-                'url': f'https://{domain}',
-                'strategy': view,
-                'key': os.getenv('GOOGLE_DEV_KEY'),
-                'category': ['performance', 'seo', 'accessibility', 'best-practices', 'pwa']
-            }
+        
+        params = {
+            'url': f'https://{domain}',
+            'strategy': 'mobile',
+            'key': os.getenv('GOOGLE_DEV_KEY'),
+            'category': ['performance', 'seo', 'accessibility', 'best-practices', 'pwa']
+        }
 
-            res = requests.get(url=url, params=params)
-            results[view] = res.json()['lighthouseResult']['categories']
+        res = requests.get(url=url, params=params)
+        results['mobile'] = res.json()['lighthouseResult']['categories']
+
+        params['stategy'] = 'desktop'
+        res = requests.get(url=url, params=params)
+        results['desktop'] = res.json()['lighthouseResult']['categories']
 
         return results
     except:
