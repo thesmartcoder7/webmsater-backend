@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from webtools.sitemap import SitemapGenerator
 from webtools.domain import *
+from webtools.page_speed_insights import process_psi_data
 
 
 @api_view(['POST'])
@@ -54,7 +55,7 @@ def page_insights(request):
     print(f'Performing PageSpeed analysis Check on {domain}')
 
     response = {
-        'page_insights': insights(domain)
+        'page_insights': process_psi_data(domain)
     }
 
     print(f'PageSpeed analysis on {domain} has been successfully completed')

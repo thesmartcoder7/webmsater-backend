@@ -6,6 +6,7 @@ import smtplib
 from datetime import datetime
 import whois
 import os
+import json
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -159,25 +160,40 @@ def insights(domain):
     url = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
     results = {}
 
-    try:
+    response = requests.head(f"https://{domain}", timeout=10)
+
+    if response.status_code == 200 or response.status_code == 301 :
+        try:
+            
+            params = {
+                'url': f'https://{domain}' if 'https://' not in domain else domain ,
+                'strategy': 'mobile',
+                'key': os.getenv('GOOGLE_DEV_KEY'),
+                'category': ['performance', 'seo', 'accessibility', 'best-practices']
+            }
+
+            res = requests.get(url=url, params=params)
+            with open('data.json', 'w') as file:
+                json.dump(res.json(), file, indent=4)
+
+            results['mobile'] = res.json()['lighthouseResult']['categories']
+
+            deskparams = {
+                'url': f'https://{domain}',
+                'strategy': 'desktop',
+                'key': os.getenv('GOOGLE_DEV_KEY'),
+                'category': ['performance', 'seo', 'accessibility', 'best-practices']
+            }
+            res = requests.get(url=url, params=deskparams)
+            results['desktop'] = res.json()['lighthouseResult']['categories']
+
+            return results
+        except:
+            return 'error fetching page insights'
+
+    else:
+        return None
         
-        params = {
-            'url': f'https://{domain}',
-            'strategy': 'mobile',
-            'key': os.getenv('GOOGLE_DEV_KEY'),
-            'category': ['performance', 'seo', 'accessibility', 'best-practices', 'pwa']
-        }
-
-        res = requests.get(url=url, params=params)
-        results['mobile'] = res.json()['lighthouseResult']['categories']
-
-        params['stategy'] = 'desktop'
-        res = requests.get(url=url, params=params)
-        results['desktop'] = res.json()['lighthouseResult']['categories']
-
-        return results
-    except:
-        return 'error fetching page insights'
 
     
 
