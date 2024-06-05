@@ -10,6 +10,27 @@ load_dotenv(find_dotenv())
 API_KEY = os.getenv('GOOGLE_DEV_KEY')
 URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 
+
+def convert_timestamp(timestamp):
+    # Parse the original timestamp
+    dt = datetime.fromisoformat(timestamp[:-1])
+    
+    # Define suffixes for day of the month
+    suffixes = {1: 'st', 2: 'nd', 3: 'rd', 21: 'st', 22: 'nd', 23: 'rd', 31: 'st'}
+    suffix = suffixes.get(dt.day, 'th')
+    
+    # Format the date
+    date_str = dt.strftime(f"%a, %B {dt.day}{suffix}, %Y")
+    
+    # Format the time
+    time_str = dt.strftime("%I:%M%p").lower()
+    
+    # Combine date and time
+    formatted_str = f"{date_str} at {time_str}"
+    
+    return formatted_str
+
+
 def fetch_psi_data(domain, strategy):
     response = requests.head(f"https://{domain}", timeout=10)
 
@@ -43,15 +64,31 @@ def custom_grade(score):
     else:
         return 'F'
 
+# def categorize_audits(audits, categories):
+#     categorized_audits = {}
+#     for cat_key, cat_value in categories.items():
+#         categorized_audits[cat_value['title']] = []
+#         for audit_ref in cat_value['auditRefs']:
+#             audit = audits[audit_ref['id']]
+#             if audit['scoreDisplayMode'] == 'numeric' and 'score' in audit:
+#                 audit['score'] = audit['score'] * 100
+#             categorized_audits[cat_value['title']].append(audit)
+#     return categorized_audits
+
 def categorize_audits(audits, categories):
+    # Create a dictionary for quick lookup of audit data by their IDs
+    audit_lookup = {audit_id: audit for audit_id, audit in audits.items()}
+
     categorized_audits = {}
     for cat_key, cat_value in categories.items():
         categorized_audits[cat_value['title']] = []
         for audit_ref in cat_value['auditRefs']:
-            audit = audits[audit_ref['id']]
-            if audit['scoreDisplayMode'] == 'numeric' and 'score' in audit:
-                audit['score'] = audit['score'] * 100
-            categorized_audits[cat_value['title']].append(audit)
+            audit_id = audit_ref['id']
+            if audit_id in audit_lookup:
+                audit = audit_lookup[audit_id]
+                if audit['scoreDisplayMode'] == 'numeric' and 'score' in audit:
+                    audit['score'] = audit['score'] * 100
+                categorized_audits[cat_value['title']].append(audit)
     return categorized_audits
 
 def extract_main_categories(categories):
@@ -72,7 +109,7 @@ def process_psi_data(domain):
 
     final_results = {
         'domain': domain,
-        'checkTime': datetime.utcnow().isoformat() + 'Z',
+        'checkTime': convert_timestamp(datetime.utcnow().isoformat() + 'Z'),
         'overalScore': (calculate_overall_score(mobile_data['lighthouseResult']['categories']) +
                         calculate_overall_score(desktop_data['lighthouseResult']['categories'])) / 2,
         'grade': custom_grade((calculate_overall_score(mobile_data['lighthouseResult']['categories']) +
@@ -91,8 +128,9 @@ def process_psi_data(domain):
 
     return final_results
 
-# Example usage
-# domain = 'https://samuel-martins.com'
-# final_results = process_psi_data(domain)
+
+if __name__ == "__main__":
+    domain = 'https://samuel-martins.com'
+    final_results = process_psi_data(domain)
 
 
